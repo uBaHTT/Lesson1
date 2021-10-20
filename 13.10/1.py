@@ -9,15 +9,12 @@ maxVoltage = 3.3
 troykaModule = 17
 comparator = 4
 list_value = []
+count_value = 0
+
 def dec2bin(dec):
     return [int(bit) for bit in bin(dec)[2:].zfill(bits)]
 
 def bin2dac(value):
-    signal = dec2bin(value)
-    GPiO.output(dac, signal)
-    return signal
-
-def num2dac(value):
     signal = dec2bin(value)
     GPiO.output(dac, signal)
     return signal
@@ -50,6 +47,7 @@ try:
                 b = value 
                 value = int((a + b) / 2)
         list_value.append(value)
+        count_value = count_value + 1
         value_str = [str(value)]
         with open("settings.txt", "a") as settings_file:
             settings_file.write("\n".join(value_str))
@@ -78,6 +76,7 @@ try:
                 b = value 
                 value = int((a + b) / 2)
         list_value.append(value)
+        count_value = count_value + 1
         value_str = [str(value)]
         with open("settings.txt", "a") as settings_file:
             settings_file.write("\n".join(value_str))
@@ -87,14 +86,19 @@ try:
             break
     
     stop_time = time.time()
-    print("Длительность эксперимента:")
-    print("{:.4f}".format(stop_time - start_time))
-    print("Период измерений:")
-    print("{:.1f}".format((stop_time - start_time) / 730))
-    print("Часота дискретизации:")
-    print("{}".format(1 / (stop_time - start_time)))
-    print("Шаг по напряжению:")
-    print("{}".format(3.3 / 256))
+    with open("data.txt", "w") as data_file:
+        data_file.write("{:.4f}\n".format(stop_time - start_time))
+        data_file.write("{:.4f}\n".format((stop_time - start_time) / count_value))
+        data_file.write("{:.4f}\n".format(count_value / (stop_time - start_time)))
+        data_file.write("{:.4f}\n".format(3.3 / 256))
+    # print("Длительность эксперимента:")
+    # print("{:.4f}".format(stop_time - start_time))
+    # print("Период измерений:")
+    # print("{:.4f}".format((stop_time - start_time) / count_value))
+    # print("Часота дискретизации:")
+    # print("{:.4f}".format(stop_time - start_time) / count_value)
+    # print("Шаг по напряжению:")
+    # print("{:.4f}".format(3.3 / 256))
     
     plt.plot(list_value)
     plt.show()
